@@ -1,0 +1,40 @@
+{
+  "movement": {
+    "acceleration": 20,
+    "friction": 10,
+    "maxSpeed": 6.6
+  },
+  "hole": {
+    "startRadius": 1.2,
+    "verticalOffset": 0.05
+  },
+  "camera": {
+    "offset": [11, 13, 11],
+    "lookAtHeight": 0.2,
+    "smoothing": 5.5
+  },
+  "swallow": {
+    "sinkDuration": 0.42,
+    "blockedPulseDuration": 0.22
+  },
+  "growthCurve": [
+    { "growth": 0, "radius": 1.2, "tier": "Tiny" },
+    { "growth": 3, "radius": 1.55, "tier": "Small" },
+    { "growth": 7, "radius": 2.1, "tier": "Street" },
+    { "growth": 12, "radius": 2.7, "tier": "Chunky" },
+    { "growth": 19, "radius": 3.4, "tier": "Heavy" },
+    { "growth": 28, "radius": 4.2, "tier": "Massive" },
+    { "growth": 40, "radius": 5.15, "tier": "Ravenous" }
+  ],
+  "hud": {
+    "progressTargetLabel": "Arena Cleared"
+  },
+  "arenaTheme": {
+    "floorColor": "#cfd9c5",
+    "floorAccentColor": "#b3c19f",
+    "wallColor": "#51604f",
+    "gridColor": "#90a383",
+    "wallHeight": 1.4,
+    "wallThickness": 0.5
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "hole-swallow-game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "three": "0.137.5"
+  },
+  "devDependencies": {
+    "@types/three": "0.137.0",
+    "@types/jest": "28.1.8",
+    "jest": "28.1.3",
+    "ts-jest": "28.0.8",
+    "typescript": "4.9.5",
+    "vite": "2.9.18"
+  }
+}

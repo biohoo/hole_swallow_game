@@ -1,0 +1,76 @@
+{
+  "shapes": [
+    {
+      "id": "tiny-sphere",
+      "geometryType": "sphere",
+      "dimensions": { "radius": 0.42 },
+      "materialPreset": "tiny",
+      "scoreValue": 10,
+      "growthValue": 0.8,
+      "requiredRadius": 1.2
+    },
+    {
+      "id": "tiny-box",
+      "geometryType": "box",
+      "dimensions": { "width": 0.78, "height": 0.78, "depth": 0.78 },
+      "materialPreset": "tiny",
+      "scoreValue": 12,
+      "growthValue": 0.95,
+      "requiredRadius": 1.2
+    },
+    {
+      "id": "medium-cylinder",
+      "geometryType": "cylinder",
+      "dimensions": { "radiusTop": 0.55, "radiusBottom": 0.55, "height": 1.2 },
+      "materialPreset": "medium",
+      "scoreValue": 24,
+      "growthValue": 1.6,
+      "requiredRadius": 1.7
+    },
+    {
+      "id": "medium-box",
+      "geometryType": "box",
+      "dimensions": { "width": 1.35, "height": 1.2, "depth": 1.35 },
+      "materialPreset": "medium",
+      "scoreValue": 30,
+      "growthValue": 2.2,
+      "requiredRadius": 2.05
+    },
+    {
+      "id": "capsule-prop",
+      "geometryType": "capsule",
+      "dimensions": { "radius": 0.5, "height": 1.5 },
+      "materialPreset": "medium",
+      "scoreValue": 34,
+      "growthValue": 2.4,
+      "requiredRadius": 2.2
+    },
+    {
+      "id": "large-cylinder",
+      "geometryType": "cylinder",
+      "dimensions": { "radiusTop": 0.9, "radiusBottom": 0.9, "height": 1.9 },
+      "materialPreset": "large",
+      "scoreValue": 52,
+      "growthValue": 3.5,
+      "requiredRadius": 3.05
+    },
+    {
+      "id": "large-sphere",
+      "geometryType": "sphere",
+      "dimensions": { "radius": 1.05 },
+      "materialPreset": "large",
+      "scoreValue": 56,
+      "growthValue": 3.9,
+      "requiredRadius": 3.15
+    },
+    {
+      "id": "teaser-monolith",
+      "geometryType": "box",
+      "dimensions": { "width": 2.2, "height": 2.8, "depth": 2.2 },
+      "materialPreset": "locked",
+      "scoreValue": 82,
+      "growthValue": 5.4,
+      "requiredRadius": 4.2
+    }
+  ]
+}
