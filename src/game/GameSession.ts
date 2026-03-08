@@ -2,8 +2,12 @@ import { loadGameConfig, loadLevel, loadShapeLibrary, validateLevelContent } fro
 import {
   advanceHoleMotion,
   calculateRadiusForGrowth,
+  canObjectFitInsideHole,
+  computeBlockedShakeStrength,
   computeCompletionRatio,
   isObjectInsideHole,
+  isObjectNearHolePlane,
+  isObjectWithinAttemptRange,
 } from "./simulation";
 import type { AudioBus } from "./audio";
 import type { ShapeRegistry } from "./shapeRegistry";
@@ -166,43 +170,53 @@ export class GameSession {
     this.state.hole.position = holeMotion.position;
     this.state.hole.velocity = holeMotion.velocity;
 
+    this.updateObjectTimers(dt);
+    this.updateObjectPhysics(dt);
+
     for (const object of this.state.objects) {
-      if (object.blockedFeedback > 0) {
-        object.blockedFeedback = Math.max(0, object.blockedFeedback - dt);
-      }
-
-      if (object.swallowing) {
-        object.swallowProgress = Math.min(1, object.swallowProgress + dt / this.config.swallow.sinkDuration);
-
-        if (object.swallowProgress >= 1) {
-          object.swallowing = false;
-          object.consumed = true;
-        }
-
+      if (object.consumed || object.swallowing) {
         continue;
       }
 
-      if (object.consumed) {
+      if (
+        !isObjectNearHolePlane(
+          object.position[1],
+          object.halfHeight,
+          this.config.swallow.captureHeightTolerance,
+        )
+      ) {
         continue;
       }
 
-      const insideHole = isObjectInsideHole(
+      const fitsInsideHole = canObjectFitInsideHole(
+        this.state.hole.radius,
+        object.fitRadius,
+        this.config.swallow.fitClearanceMultiplier,
+      );
+      const attemptRangeReached = isObjectWithinAttemptRange(
         this.state.hole.position,
         this.state.hole.radius,
         [object.position[0], object.position[2]],
-        object.footprintRadius,
+        object.fitRadius,
+        this.config.swallow.attemptOverlapPadding,
       );
 
-      if (!insideHole) {
+      if (!fitsInsideHole && attemptRangeReached) {
+        this.triggerBlockedResponse(object);
         continue;
       }
 
-      if (this.state.hole.radius < object.requiredRadius) {
-        object.blockedFeedback = this.config.swallow.blockedPulseDuration;
-        continue;
+      if (
+        fitsInsideHole &&
+        isObjectInsideHole(
+          this.state.hole.position,
+          this.state.hole.radius,
+          [object.position[0], object.position[2]],
+          object.fitRadius,
+        )
+      ) {
+        this.swallowObject(object);
       }
-
-      this.swallowObject(object);
     }
 
     this.state.progressRatio = computeCompletionRatio(
@@ -234,15 +248,18 @@ export class GameSession {
         position: [...spawn.position],
         rotation: spawn.rotation ? [...spawn.rotation] : [0, 0, 0],
         scale: spawn.scale ?? 1,
-        footprintRadius: this.options.shapeRegistry.getFootprint(shape) * (spawn.scale ?? 1),
-        requiredRadius: shape.requiredRadius * (spawn.scale ?? 1),
+        fitRadius: this.options.shapeRegistry.getFootprint(shape) * (spawn.scale ?? 1),
+        halfHeight: this.options.shapeRegistry.getHalfHeight(shape) * (spawn.scale ?? 1),
         scoreValue: shape.scoreValue,
         growthValue: shape.growthValue,
         materialPreset: shape.materialPreset,
         consumed: false,
         swallowing: false,
         swallowProgress: 0,
+        verticalVelocity: 0,
         blockedFeedback: 0,
+        blockedShakeTime: 0,
+        blockedShakeStrength: 0,
       };
     });
   }
@@ -250,6 +267,10 @@ export class GameSession {
   private swallowObject(object: RuntimeObjectState): void {
     object.swallowing = true;
     object.swallowProgress = 0;
+    object.blockedFeedback = 0;
+    object.blockedShakeTime = 0;
+    object.blockedShakeStrength = 0;
+    object.verticalVelocity = 0;
     this.state.score += object.scoreValue;
     this.state.consumedScore += object.scoreValue;
     this.state.consumedCount += 1;
@@ -274,5 +295,123 @@ export class GameSession {
 
   private getTotalScore(objects: RuntimeObjectState[]): number {
     return objects.reduce((total, object) => total + object.scoreValue, 0);
+  }
+
+  private updateObjectTimers(dt: number): void {
+    for (const object of this.state.objects) {
+      if (object.blockedFeedback > 0) {
+        object.blockedFeedback = Math.max(0, object.blockedFeedback - dt);
+      }
+
+      if (object.blockedShakeTime > 0) {
+        object.blockedShakeTime = Math.max(0, object.blockedShakeTime - dt);
+
+        if (object.blockedShakeTime === 0) {
+          object.blockedShakeStrength = 0;
+        }
+      }
+
+      if (!object.swallowing) {
+        continue;
+      }
+
+      object.swallowProgress = Math.min(1, object.swallowProgress + dt / this.config!.swallow.sinkDuration);
+
+      if (object.swallowProgress >= 1) {
+        object.swallowing = false;
+        object.consumed = true;
+      }
+    }
+  }
+
+  private updateObjectPhysics(dt: number): void {
+    const activeObjects = this.state.objects
+      .filter((object) => !object.consumed && !object.swallowing)
+      .sort((left, right) => left.position[1] - right.position[1]);
+
+    for (const object of activeObjects) {
+      const gravityVelocity = Math.max(
+        -this.config!.physics.maxFallSpeed,
+        object.verticalVelocity - this.config!.physics.gravity * dt,
+      );
+      const nextCenterY = object.position[1] + gravityVelocity * dt;
+      const supportTopY = this.findSupportTopY(object, activeObjects);
+      const snappedCenterY = supportTopY + object.halfHeight;
+      const nextBottomY = nextCenterY - object.halfHeight;
+      const currentBottomY = object.position[1] - object.halfHeight;
+
+      if (
+        nextBottomY <= supportTopY + this.config!.physics.groundSnapDistance &&
+        currentBottomY >= supportTopY - this.config!.physics.groundSnapDistance
+      ) {
+        object.position[1] = snappedCenterY;
+        object.verticalVelocity = 0;
+      } else {
+        object.position[1] = nextCenterY;
+        object.verticalVelocity = gravityVelocity;
+      }
+    }
+  }
+
+  private findSupportTopY(
+    object: RuntimeObjectState,
+    activeObjects: RuntimeObjectState[],
+  ): number {
+    let highestSupportTopY = 0;
+    const objectBottomY = object.position[1] - object.halfHeight;
+
+    for (const candidate of activeObjects) {
+      if (candidate.instanceId === object.instanceId) {
+        continue;
+      }
+
+      const candidateTopY = candidate.position[1] + candidate.halfHeight;
+      if (candidateTopY > objectBottomY + this.config!.physics.groundSnapDistance) {
+        continue;
+      }
+
+      const horizontalDistance = Math.hypot(
+        object.position[0] - candidate.position[0],
+        object.position[2] - candidate.position[2],
+      );
+      const supportReach =
+        candidate.fitRadius * 0.65 + this.config!.physics.supportProbePadding;
+
+      if (horizontalDistance > supportReach) {
+        continue;
+      }
+
+      if (candidateTopY > highestSupportTopY) {
+        highestSupportTopY = candidateTopY;
+      }
+    }
+
+    return highestSupportTopY;
+  }
+
+  private triggerBlockedResponse(object: RuntimeObjectState): void {
+    const shakeStrength = computeBlockedShakeStrength(
+      this.state.hole.radius,
+      object.fitRadius,
+      this.config!.swallow.fitClearanceMultiplier,
+    );
+
+    if (shakeStrength <= 0) {
+      return;
+    }
+
+    const retriggerThreshold = this.config!.swallow.blockedShakeDuration * 0.3;
+    if (
+      object.blockedShakeTime <= retriggerThreshold ||
+      shakeStrength > object.blockedShakeStrength + 0.08
+    ) {
+      object.blockedShakeTime = this.config!.swallow.blockedShakeDuration;
+      object.blockedShakeStrength = shakeStrength;
+    }
+
+    object.blockedFeedback = Math.max(
+      object.blockedFeedback,
+      this.config!.swallow.blockedPulseDuration,
+    );
   }
 }

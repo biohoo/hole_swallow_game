@@ -15,7 +15,19 @@
   },
   "swallow": {
     "sinkDuration": 0.42,
-    "blockedPulseDuration": 0.22
+    "blockedPulseDuration": 0.22,
+    "fitClearanceMultiplier": 0.96,
+    "attemptOverlapPadding": 0.28,
+    "blockedShakeDuration": 0.32,
+    "blockedShakeMaxDistance": 0.24,
+    "blockedShakeFrequency": 17,
+    "captureHeightTolerance": 0.12
+  },
+  "physics": {
+    "gravity": 16,
+    "maxFallSpeed": 20,
+    "groundSnapDistance": 0.08,
+    "supportProbePadding": 0.12
   },
   "growthCurve": [
     { "growth": 0, "radius": 1.2, "tier": "Tiny" },

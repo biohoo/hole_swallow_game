@@ -1,7 +1,7 @@
 {
   "id": "demo-01",
   "title": "Starter Swallow Yard",
-  "tutorialText": "Use the arrow keys to sweep up the smallest shapes first, then chase the larger ones around the edge.",
+  "tutorialText": "Sweep up the tiny props first, grow into the mid-sized pieces, and knock supports out from under stacked objects so they fall into reach.",
   "arena": {
     "width": 24,
     "depth": 24
@@ -15,26 +15,28 @@
     "target": 0.8
   },
   "spawns": [
-    { "shapeId": "tiny-sphere", "position": [-2.8, 0.42, -2.2] },
-    { "shapeId": "tiny-sphere", "position": [-1.4, 0.42, -2.7] },
-    { "shapeId": "tiny-sphere", "position": [0.3, 0.42, -2.9] },
-    { "shapeId": "tiny-sphere", "position": [1.8, 0.42, -2.1] },
-    { "shapeId": "tiny-sphere", "position": [2.7, 0.42, -0.8] },
-    { "shapeId": "tiny-box", "position": [-2.6, 0.39, 1.7], "rotation": [0.1, 0.5, 0] },
-    { "shapeId": "tiny-box", "position": [-1, 0.39, 2.5], "rotation": [0, 0.2, 0.1] },
-    { "shapeId": "tiny-box", "position": [1.2, 0.39, 2.6], "rotation": [0, 0.8, 0] },
-    { "shapeId": "tiny-box", "position": [2.9, 0.39, 1.4], "rotation": [0.2, 0.3, 0.1] },
-    { "shapeId": "medium-cylinder", "position": [-7.2, 0.6, -4.5] },
-    { "shapeId": "medium-cylinder", "position": [7.4, 0.6, -3.8] },
-    { "shapeId": "medium-cylinder", "position": [-6.1, 0.6, 5.4] },
-    { "shapeId": "medium-box", "position": [5.8, 0.6, 6.3], "rotation": [0.1, 0.7, 0] },
-    { "shapeId": "medium-box", "position": [-5.5, 0.6, -7.2], "rotation": [0, 0.4, 0.1] },
-    { "shapeId": "capsule-prop", "position": [0, 0.75, 8.3], "rotation": [0, 0.6, 1.57] },
-    { "shapeId": "capsule-prop", "position": [8.2, 0.75, 0.8], "rotation": [1.57, 0.2, 0] },
-    { "shapeId": "large-cylinder", "position": [-9.1, 0.95, 8.2] },
-    { "shapeId": "large-sphere", "position": [8.8, 1.05, 8.8] },
-    { "shapeId": "large-sphere", "position": [-8.6, 1.05, -8.7] },
-    { "shapeId": "teaser-monolith", "position": [9.4, 1.4, -9.2], "rotation": [0, 0.4, 0] },
-    { "shapeId": "teaser-monolith", "position": [-9.6, 1.4, 9.4], "rotation": [0, -0.5, 0] }
+    { "shapeId": "tiny-sphere", "position": [-2.6, 0.26, -2.1] },
+    { "shapeId": "tiny-sphere", "position": [-1.2, 0.26, -2.7] },
+    { "shapeId": "tiny-sphere", "position": [0.5, 0.26, -2.8] },
+    { "shapeId": "tiny-sphere", "position": [2.1, 0.26, -2] },
+    { "shapeId": "tiny-sphere", "position": [3, 0.26, -0.8] },
+    { "shapeId": "tiny-box", "position": [-2.9, 0.26, 1.5], "rotation": [0, 0.4, 0] },
+    { "shapeId": "tiny-box", "position": [-1.1, 0.26, 2.3], "rotation": [0, 0.2, 0] },
+    { "shapeId": "tiny-box", "position": [1.1, 0.26, 2.7], "rotation": [0, 0.7, 0] },
+    { "shapeId": "tiny-box", "position": [3, 0.26, 1.3], "rotation": [0, 0.28, 0] },
+    { "shapeId": "medium-cylinder", "position": [-6.8, 0.62, -3.6] },
+    { "shapeId": "medium-cylinder", "position": [6.9, 0.62, -3.4] },
+    { "shapeId": "medium-cylinder", "position": [-6.2, 0.62, 4.9] },
+    { "shapeId": "medium-box", "position": [5.7, 0.575, 5.8], "rotation": [0, 0.55, 0] },
+    { "shapeId": "medium-box", "position": [-5.8, 0.575, -6.8], "rotation": [0, 0.25, 0] },
+    { "shapeId": "tiny-sphere", "position": [5.7, 1.41, 5.8] },
+    { "shapeId": "capsule-prop", "position": [0.3, 1.05, 8.1], "rotation": [0, 0.45, 0] },
+    { "shapeId": "capsule-prop", "position": [8.1, 1.05, 0.7], "rotation": [0, 1.05, 0] },
+    { "shapeId": "large-cylinder", "position": [-8.7, 1.025, 7.7] },
+    { "shapeId": "large-sphere", "position": [8.5, 1.72, 8.5] },
+    { "shapeId": "large-sphere", "position": [-8.2, 1.72, -8.4] },
+    { "shapeId": "tiny-box", "position": [-8.7, 2.31, 7.7], "rotation": [0, 0.5, 0] },
+    { "shapeId": "teaser-monolith", "position": [9.2, 1.9, -9] },
+    { "shapeId": "teaser-monolith", "position": [-9.4, 1.9, 9.2], "rotation": [0, -0.35, 0] }
   ]
 }

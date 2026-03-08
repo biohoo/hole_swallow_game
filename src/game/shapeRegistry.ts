@@ -16,17 +16,24 @@ export type ShapeBuilder = (
 ) => Object3D;
 
 export type FootprintRule = (definition: ShapeDefinition) => number;
+export type HalfHeightRule = (definition: ShapeDefinition) => number;
 
 interface RegistryEntry {
   builder: ShapeBuilder;
   footprintRule: FootprintRule;
+  halfHeightRule: HalfHeightRule;
 }
 
 export class ShapeRegistry {
   private readonly entries = new Map<string, RegistryEntry>();
 
-  register(type: string, builder: ShapeBuilder, footprintRule: FootprintRule): void {
-    this.entries.set(type, { builder, footprintRule });
+  register(
+    type: string,
+    builder: ShapeBuilder,
+    footprintRule: FootprintRule,
+    halfHeightRule: HalfHeightRule = footprintRule,
+  ): void {
+    this.entries.set(type, { builder, footprintRule, halfHeightRule });
   }
 
   has(type: string): boolean {
@@ -59,6 +66,16 @@ export class ShapeRegistry {
 
     return entry.footprintRule(definition);
   }
+
+  getHalfHeight(definition: ShapeDefinition): number {
+    const entry = this.entries.get(definition.geometryType);
+
+    if (!entry) {
+      throw new Error(`No half-height rule registered for "${definition.geometryType}".`);
+    }
+
+    return entry.halfHeightRule(definition);
+  }
 }
 
 export function createDefaultShapeRegistry(): ShapeRegistry {
@@ -77,12 +94,14 @@ export function createDefaultShapeRegistry(): ShapeRegistry {
       ),
     (definition) =>
       Math.hypot(definition.dimensions.width / 2, definition.dimensions.depth / 2),
+    (definition) => definition.dimensions.height / 2,
   );
 
   registry.register(
     "sphere",
     (definition, createMaterial) =>
       new Mesh(new SphereGeometry(definition.dimensions.radius, 24, 18), createMaterial()),
+    (definition) => definition.dimensions.radius,
     (definition) => definition.dimensions.radius,
   );
 
@@ -99,6 +118,7 @@ export function createDefaultShapeRegistry(): ShapeRegistry {
         createMaterial(),
       ),
     (definition) => Math.max(definition.dimensions.radiusTop, definition.dimensions.radiusBottom),
+    (definition) => definition.dimensions.height / 2,
   );
 
   registry.register(
@@ -122,6 +142,7 @@ export function createDefaultShapeRegistry(): ShapeRegistry {
       return group;
     },
     (definition) => definition.dimensions.radius + definition.dimensions.height / 2,
+    (definition) => definition.dimensions.height / 2,
   );
 
   return registry;

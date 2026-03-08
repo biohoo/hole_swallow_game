@@ -26,6 +26,18 @@ export interface GameConfig {
   swallow: {
     sinkDuration: number;
     blockedPulseDuration: number;
+    fitClearanceMultiplier: number;
+    attemptOverlapPadding: number;
+    blockedShakeDuration: number;
+    blockedShakeMaxDistance: number;
+    blockedShakeFrequency: number;
+    captureHeightTolerance: number;
+  };
+  physics: {
+    gravity: number;
+    maxFallSpeed: number;
+    groundSnapDistance: number;
+    supportProbePadding: number;
   };
   growthCurve: GrowthPoint[];
   hud: {
@@ -53,7 +65,7 @@ export interface ShapeDefinition {
   materialPreset: MaterialPreset;
   scoreValue: number;
   growthValue: number;
-  requiredRadius: number;
+  requiredRadius?: number;
 }
 
 export interface SpawnDefinition {
@@ -91,15 +103,18 @@ export interface RuntimeObjectState {
   position: Vec3Tuple;
   rotation: Vec3Tuple;
   scale: number;
-  footprintRadius: number;
-  requiredRadius: number;
+  fitRadius: number;
+  halfHeight: number;
   scoreValue: number;
   growthValue: number;
   materialPreset: MaterialPreset;
   consumed: boolean;
   swallowing: boolean;
   swallowProgress: number;
+  verticalVelocity: number;
   blockedFeedback: number;
+  blockedShakeTime: number;
+  blockedShakeStrength: number;
 }
 
 export interface HoleState {

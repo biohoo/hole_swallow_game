@@ -46,11 +46,51 @@ export function isObjectInsideHole(
   holePosition: [number, number],
   holeRadius: number,
   objectPosition: [number, number],
-  footprintRadius: number,
+  fitRadius: number,
 ): boolean {
   const dx = objectPosition[0] - holePosition[0];
   const dz = objectPosition[1] - holePosition[1];
-  return Math.hypot(dx, dz) + footprintRadius <= holeRadius;
+  return Math.hypot(dx, dz) + fitRadius <= holeRadius;
+}
+
+export function canObjectFitInsideHole(
+  holeRadius: number,
+  fitRadius: number,
+  fitClearanceMultiplier: number,
+): boolean {
+  return fitRadius <= holeRadius * fitClearanceMultiplier;
+}
+
+export function isObjectWithinAttemptRange(
+  holePosition: [number, number],
+  holeRadius: number,
+  objectPosition: [number, number],
+  fitRadius: number,
+  overlapPadding: number,
+): boolean {
+  const dx = objectPosition[0] - holePosition[0];
+  const dz = objectPosition[1] - holePosition[1];
+  return Math.hypot(dx, dz) <= holeRadius + fitRadius + overlapPadding;
+}
+
+export function computeBlockedShakeStrength(
+  holeRadius: number,
+  fitRadius: number,
+  fitClearanceMultiplier: number,
+): number {
+  if (fitRadius <= 0) {
+    return 0;
+  }
+
+  return Math.max(0, Math.min(1, (holeRadius * fitClearanceMultiplier) / fitRadius));
+}
+
+export function isObjectNearHolePlane(
+  positionY: number,
+  halfHeight: number,
+  captureHeightTolerance: number,
+): boolean {
+  return positionY - halfHeight <= captureHeightTolerance;
 }
 
 export function computeCompletionRatio(consumedScore: number, totalScore: number): number {

@@ -3,74 +3,67 @@
     {
       "id": "tiny-sphere",
       "geometryType": "sphere",
-      "dimensions": { "radius": 0.42 },
+      "dimensions": { "radius": 0.26 },
       "materialPreset": "tiny",
-      "scoreValue": 10,
-      "growthValue": 0.8,
-      "requiredRadius": 1.2
+      "scoreValue": 8,
+      "growthValue": 0.4
     },
     {
       "id": "tiny-box",
       "geometryType": "box",
-      "dimensions": { "width": 0.78, "height": 0.78, "depth": 0.78 },
+      "dimensions": { "width": 0.62, "height": 0.52, "depth": 0.62 },
       "materialPreset": "tiny",
-      "scoreValue": 12,
-      "growthValue": 0.95,
-      "requiredRadius": 1.2
+      "scoreValue": 10,
+      "growthValue": 0.58
     },
     {
       "id": "medium-cylinder",
       "geometryType": "cylinder",
-      "dimensions": { "radiusTop": 0.55, "radiusBottom": 0.55, "height": 1.2 },
+      "dimensions": { "radiusTop": 0.78, "radiusBottom": 0.78, "height": 1.24 },
       "materialPreset": "medium",
-      "scoreValue": 24,
-      "growthValue": 1.6,
-      "requiredRadius": 1.7
+      "scoreValue": 20,
+      "growthValue": 1.1
     },
     {
       "id": "medium-box",
       "geometryType": "box",
-      "dimensions": { "width": 1.35, "height": 1.2, "depth": 1.35 },
+      "dimensions": { "width": 1.7, "height": 1.15, "depth": 1.5 },
       "materialPreset": "medium",
-      "scoreValue": 30,
-      "growthValue": 2.2,
-      "requiredRadius": 2.05
+      "scoreValue": 28,
+      "growthValue": 1.7
     },
     {
       "id": "capsule-prop",
       "geometryType": "capsule",
-      "dimensions": { "radius": 0.5, "height": 1.5 },
+      "dimensions": { "radius": 0.38, "height": 2.1 },
       "materialPreset": "medium",
-      "scoreValue": 34,
-      "growthValue": 2.4,
-      "requiredRadius": 2.2
+      "scoreValue": 36,
+      "growthValue": 2.5
     },
     {
       "id": "large-cylinder",
       "geometryType": "cylinder",
-      "dimensions": { "radiusTop": 0.9, "radiusBottom": 0.9, "height": 1.9 },
+      "dimensions": { "radiusTop": 1.35, "radiusBottom": 1.35, "height": 2.05 },
       "materialPreset": "large",
-      "scoreValue": 52,
-      "growthValue": 3.5,
-      "requiredRadius": 3.05
+      "scoreValue": 54,
+      "growthValue": 3.3
     },
     {
       "id": "large-sphere",
       "geometryType": "sphere",
-      "dimensions": { "radius": 1.05 },
+      "dimensions": { "radius": 1.72 },
       "materialPreset": "large",
-      "scoreValue": 56,
-      "growthValue": 3.9,
-      "requiredRadius": 3.15
+      "scoreValue": 66,
+      "growthValue": 4.1,
+      "requiredRadius": 1.1
     },
     {
       "id": "teaser-monolith",
       "geometryType": "box",
-      "dimensions": { "width": 2.2, "height": 2.8, "depth": 2.2 },
+      "dimensions": { "width": 3.4, "height": 3.8, "depth": 3 },
       "materialPreset": "locked",
-      "scoreValue": 82,
-      "growthValue": 5.4,
-      "requiredRadius": 4.2
+      "scoreValue": 92,
+      "growthValue": 6.2
     }
   ]
 }

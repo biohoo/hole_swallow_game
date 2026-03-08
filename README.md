@@ -24,6 +24,8 @@ npm run build
 
 Levels reference shapes by `shapeId`, so most gameplay tuning is data-only.
 
+Swallow fit is derived automatically from each shape's footprint, and stacked props can fall with simple vertical physics when their support disappears.
+
 ## Add a new shape
 
 ### Data-only shape
@@ -35,13 +37,14 @@ Add an entry in `public/shapes/shapes.json` using one of the built-in geometry t
 - `cylinder`
 - `capsule`
 
-Each shape defines dimensions, material preset, score value, growth value, and required hole radius.
+Each shape defines dimensions, material preset, score value, and growth value. Physical fit comes from the shape footprint automatically, so `requiredRadius` is only a legacy compatibility field if present.
 
 ### New geometry type
 
 Register it in [`src/game/shapeRegistry.ts`](/Users/jonathanrice/Developer/hole_swallow_game/src/game/shapeRegistry.ts):
 
 - add `ShapeRegistry.register(type, builder, footprintRule)`
+- optionally pass a half-height rule when the new shape should participate accurately in stacked falling
 - make the `builder` return a Three.js object
 - make the `footprintRule` return the swallow footprint radius
 

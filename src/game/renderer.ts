@@ -13,11 +13,13 @@ import {
   PerspectiveCamera,
   PlaneGeometry,
   RingGeometry,
+  PCFSoftShadowMap,
   Scene,
   Vector3,
   WebGLRenderer,
 } from "three";
 
+import { canObjectFitInsideHole } from "./simulation";
 import type { ShapeRegistry } from "./shapeRegistry";
 import type { GameState, MaterialPreset, RuntimeObjectState } from "./types";
 
@@ -51,6 +53,7 @@ export class GameRenderer {
   );
   private readonly cameraLookAt = new Vector3();
   private readonly cameraTarget = new Vector3();
+  private readonly sun = new DirectionalLight("#fff7e8", 1.1);
   private readonly objectMap = new Map<string, Object3D>();
   private readonly objectMaterials = new Map<string, MeshStandardMaterial[]>();
   private currentLevelId = "";
@@ -59,6 +62,8 @@ export class GameRenderer {
   constructor(private readonly options: GameRendererOptions) {
     this.renderer = new WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.domElement.className = "game-canvas";
     this.options.container.appendChild(this.renderer.domElement);
 
@@ -72,9 +77,18 @@ export class GameRenderer {
     this.holeGroup.add(this.holeRim);
 
     this.scene.add(new AmbientLight("#fff7e8", 0.8));
-    const sun = new DirectionalLight("#ffffff", 1.05);
-    sun.position.set(8, 14, 6);
-    this.scene.add(sun);
+    this.sun.position.set(8, 14, 6);
+    this.sun.castShadow = true;
+    this.sun.shadow.mapSize.set(1024, 1024);
+    this.sun.shadow.bias = -0.0002;
+    this.sun.shadow.camera.near = 1;
+    this.sun.shadow.camera.far = 35;
+    this.sun.shadow.camera.left = -18;
+    this.sun.shadow.camera.right = 18;
+    this.sun.shadow.camera.top = 18;
+    this.sun.shadow.camera.bottom = -18;
+    this.scene.add(this.sun);
+    this.scene.add(this.sun.target);
 
     this.scene.background = new Color("#dbe7cf");
 
@@ -124,6 +138,7 @@ export class GameRenderer {
       }),
     );
     floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
     this.arenaGroup.add(floor);
 
     const grid = new GridHelper(
@@ -149,6 +164,8 @@ export class GameRenderer {
       wallMaterial,
     );
     wallNorth.position.set(0, wallHeight / 2, -(state.arena!.depth / 2 + wallThickness / 2));
+    wallNorth.castShadow = true;
+    wallNorth.receiveShadow = true;
     this.arenaGroup.add(wallNorth);
 
     const wallSouth = wallNorth.clone();
@@ -160,6 +177,8 @@ export class GameRenderer {
       wallMaterial,
     );
     wallEast.position.set(state.arena!.width / 2 + wallThickness / 2, wallHeight / 2, 0);
+    wallEast.castShadow = true;
+    wallEast.receiveShadow = true;
     this.arenaGroup.add(wallEast);
 
     const wallWest = wallEast.clone();
@@ -189,14 +208,27 @@ export class GameRenderer {
       const materials = this.objectMaterials.get(object.instanceId) ?? [];
       const swallowOffset = object.swallowing ? object.swallowProgress * 1.2 : 0;
       const scale = object.scale * (object.swallowing ? 1 - object.swallowProgress * 0.65 : 1);
+      const shakeOffset = this.getBlockedShakeOffset(object, state);
 
-      object3d.position.set(object.position[0], object.position[1] - swallowOffset, object.position[2]);
+      object3d.position.set(
+        object.position[0] + shakeOffset.x,
+        object.position[1] - swallowOffset,
+        object.position[2] + shakeOffset.z,
+      );
       object3d.rotation.set(object.rotation[0], object.rotation[1], object.rotation[2]);
       object3d.scale.setScalar(scale);
       object3d.visible = !object.consumed;
 
-      const blockedPulse = object.blockedFeedback > 0 ? 0.45 + object.blockedFeedback * 1.4 : 0;
-      const eligible = state.hole.radius >= object.requiredRadius;
+      const blockedPulse =
+        object.blockedFeedback > 0
+          ? 0.45 +
+            (object.blockedFeedback / state.config!.swallow.blockedPulseDuration) * 0.65
+          : 0;
+      const eligible = canObjectFitInsideHole(
+        state.hole.radius,
+        object.fitRadius,
+        state.config!.swallow.fitClearanceMultiplier,
+      );
 
       for (const material of materials) {
         const baseColor = new Color(
@@ -233,6 +265,13 @@ export class GameRenderer {
       state.hole.position[1],
     );
     this.camera.lookAt(this.cameraLookAt);
+    this.sun.position.set(
+      state.hole.position[0] + 8,
+      14,
+      state.hole.position[1] + 6,
+    );
+    this.sun.target.position.copy(this.cameraLookAt);
+    this.sun.target.updateMatrixWorld();
   }
 
   private createObjectMesh(object: RuntimeObjectState): Object3D {
@@ -248,8 +287,8 @@ export class GameRenderer {
     });
 
     object3d.traverse((child) => {
-      child.castShadow = false;
-      child.receiveShadow = false;
+      child.castShadow = true;
+      child.receiveShadow = true;
     });
 
     this.objectMaterials.set(object.instanceId, materials);
@@ -265,4 +304,49 @@ export class GameRenderer {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
   };
+
+  private getBlockedShakeOffset(
+    object: RuntimeObjectState,
+    state: GameState,
+  ): { x: number; z: number } {
+    if (
+      object.swallowing ||
+      object.blockedShakeTime <= 0 ||
+      object.blockedShakeStrength <= 0
+    ) {
+      return { x: 0, z: 0 };
+    }
+
+    const duration = state.config!.swallow.blockedShakeDuration;
+    const progress = 1 - object.blockedShakeTime / duration;
+    const envelope = Math.sin(progress * Math.PI);
+    const phase = progress * state.config!.swallow.blockedShakeFrequency * Math.PI * 2;
+    const sizeDamping = Math.max(0.18, Math.min(1, 1 / Math.max(1, object.fitRadius)));
+    const distance =
+      state.config!.swallow.blockedShakeMaxDistance *
+      object.blockedShakeStrength *
+      sizeDamping *
+      envelope *
+      Math.sin(phase);
+    const direction = this.getShakeDirection(object.instanceId);
+
+    return {
+      x: direction.x * distance,
+      z: direction.z * distance,
+    };
+  }
+
+  private getShakeDirection(instanceId: string): { x: number; z: number } {
+    let hash = 0;
+
+    for (let index = 0; index < instanceId.length; index += 1) {
+      hash = (hash * 31 + instanceId.charCodeAt(index)) >>> 0;
+    }
+
+    const angle = (hash % 360) * (Math.PI / 180);
+    return {
+      x: Math.cos(angle),
+      z: Math.sin(angle),
+    };
+  }
 }

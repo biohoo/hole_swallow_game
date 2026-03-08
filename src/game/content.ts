@@ -81,7 +81,9 @@ function validateShapeLibrary(data: ShapeLibraryDefinition): ShapeDefinition[] {
     validateShapeDimensions(shape);
     assertPositiveNumber(shape.scoreValue, `${shape.id}.scoreValue`);
     assertPositiveNumber(shape.growthValue, `${shape.id}.growthValue`);
-    assertPositiveNumber(shape.requiredRadius, `${shape.id}.requiredRadius`);
+    if (shape.requiredRadius !== undefined) {
+      assertPositiveNumber(shape.requiredRadius, `${shape.id}.requiredRadius`);
+    }
     return shape;
   });
 }
@@ -121,6 +123,16 @@ function validateGameConfig(config: GameConfig): GameConfig {
   assertPositiveNumber(config.hole.startRadius, "hole.startRadius");
   assertPositiveNumber(config.swallow.sinkDuration, "swallow.sinkDuration");
   assertPositiveNumber(config.swallow.blockedPulseDuration, "swallow.blockedPulseDuration");
+  assertPositiveNumber(config.swallow.fitClearanceMultiplier, "swallow.fitClearanceMultiplier");
+  assertNumber(config.swallow.attemptOverlapPadding, "swallow.attemptOverlapPadding");
+  assertPositiveNumber(config.swallow.blockedShakeDuration, "swallow.blockedShakeDuration");
+  assertPositiveNumber(config.swallow.blockedShakeMaxDistance, "swallow.blockedShakeMaxDistance");
+  assertPositiveNumber(config.swallow.blockedShakeFrequency, "swallow.blockedShakeFrequency");
+  assertNumber(config.swallow.captureHeightTolerance, "swallow.captureHeightTolerance");
+  assertPositiveNumber(config.physics.gravity, "physics.gravity");
+  assertPositiveNumber(config.physics.maxFallSpeed, "physics.maxFallSpeed");
+  assertPositiveNumber(config.physics.groundSnapDistance, "physics.groundSnapDistance");
+  assertNumber(config.physics.supportProbePadding, "physics.supportProbePadding");
 
   if (!Array.isArray(config.camera.offset) || config.camera.offset.length !== 3) {
     throw new Error("camera.offset must be a 3-item tuple.");
